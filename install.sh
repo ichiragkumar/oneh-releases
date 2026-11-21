@@ -53,6 +53,10 @@ PRINT_VERSION=0
 PIN_VERSION=""
 PURGE_DATA=0
 FROM_SOURCE=0
+# macOS default is NATIVE-ONLY (owner decision 2026-11-22): the one-click
+# command installs the real OneH.app into ~/Applications, not a web bundle.
+# --with-web restores the prebuilt web + bundled-Node path.
+WITH_WEB="${ONEH_WITH_WEB:-0}"
 MARKER='# oneh-app shim (added by oneh installer)'
 
 TMP_APP=""
@@ -76,12 +80,16 @@ usage() {
   cat <<EOF
 Usage: sh install.sh [options]
 
-Default path (prebuilt): downloads oneh-web-<version>-<os>-<arch>.tar.gz and
-  its .sha256 from ONEH_RELEASES_URL (default:
+Default on macOS: NATIVE ONLY. Downloads OneH-<version>-arm64.zip + .sha256
+  from ONEH_RELEASES_URL (default:
   https://github.com/ichiragkumar/oneh-releases/releases/latest/download),
-  verifies the checksum, extracts to ~/.oneh/app and runs the bundled Node.
-  Requires curl or wget, tar, and a SHA-256 tool. No git/npm/system Node.
+  verifies SHA-256, installs the REAL app into ~/Applications/OneH.app with a
+  backup, clears quarantine on that bundle only, and launches it. No web
+  bundle, no Node, no oneh-app shim. Ad-hoc signed (not notarized).
+  On non-macOS the prebuilt web path is kept (no native app exists there).
 
+  --with-web               install the prebuilt web bundle + bundled Node
+                           instead of the native-only macOS default.
   --from-source            use the OLD path (git clone + npm ci + build);
                            requires git, npm and Node >= 22.12
   --channel <stable|main>  channel label (default stable; informational on the
@@ -107,6 +115,7 @@ while [ "$#" -gt 0 ]; do
     --uninstall) UNINSTALL=1 ;;
     --purge-data) PURGE_DATA=1 ;;
     --from-source) FROM_SOURCE=1 ;;
+    --with-web) WITH_WEB=1 ;;
     --version) PRINT_VERSION=1 ;;
     --version=*) PIN_VERSION=${_arg#--version=} ;;
     --channel) shift; [ "$#" -gt 0 ] || die "--channel needs a value (stable|main)"; CHANNEL=$1 ;;
@@ -1385,6 +1394,30 @@ else
   rm -rf "$DOWNLOAD_DIR"
   mkdir -p "$DOWNLOAD_DIR"
   fetch_version
+
+  # NATIVE-ONLY default on macOS: install the real OneH.app and finish here.
+  # No web tarball, no bundled Node, no oneh-app shim. The module is fetched
+  # from the SAME fixed RELEASES_URL used for all other assets.
+  if [ "$ONEH_OS" = darwin ] && [ "$WITH_WEB" -eq 0 ]; then
+    progress "4/8 Downloading native app metadata"
+    NATIVE_MODULE="$ONEH_HOME/.native-module.$$"
+    NATIVE_READY=0
+    if [ -f "$SCRIPT_DIR/lib/native-app.sh" ]; then
+      cp "$SCRIPT_DIR/lib/native-app.sh" "$NATIVE_MODULE" && NATIVE_READY=1
+    elif curl -fsSL --max-time 30 "$RELEASES_URL/native-app.sh" -o "$NATIVE_MODULE"; then
+      NATIVE_READY=1
+    fi
+    [ "$NATIVE_READY" = 1 ] || die "Could not fetch native-app.sh from $RELEASES_URL."
+    . "$NATIVE_MODULE"
+    command -v oneh_native_install >/dev/null 2>&1 \
+      || die "native-app.sh has no installer entry point."
+    oneh_native_install || die "Native app install failed; no web fallback in native-only mode."
+    printf '%s\n' "$VERSION_TOKEN" > "$ONEH_HOME/VERSION"
+    rm -f "$NATIVE_MODULE"
+    log "Native-only install complete: ~/Applications/OneH.app ($VERSION_TOKEN)."
+    log "Ad-hoc signed, not notarized. Re-run this command to update. Full log: $LOG_FILE"
+    exit 0
+  fi
 
   progress "4/8 Downloading artifact"
   verify_tarball
