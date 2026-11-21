@@ -1,18 +1,18 @@
 {
   "version": "0.1.0",
   "tag": "v0.1.0",
-  "notes": "Prebuilt local install (no signed binary, no CI/deploy). Fill sha256 and bytes with the real values of the uploaded assets before publishing.",
-  "publishedAt": "2026-11-21T20:26:55Z",
+  "notes": "Prebuilt local install; no signed binary, no CI/deploy. Assets are ad-hoc/unsigned; verify sha256 before install.",
+  "publishedAt": "2026-11-20T00:00:00Z",
   "assets": {
     "web": {
       "file": "oneh-web-0.1.0-macos-arm64.tar.gz",
-      "sha256": "",
-      "bytes": 0
+      "sha256": "6a56046d3a13149f26af0425593ec82dab6a3bd8bb2d6a89438ee951b9b0dad8",
+      "bytes": 79523381
     },
     "native": {
       "file": "OneH-0.1.0-arm64.zip",
-      "sha256": "",
-      "bytes": 0
+      "sha256": "40ddf547d293c2601f64e0f0e72c4bcff9b92231230a73f163a27e66bf3136ea",
+      "bytes": 11982522
     }
   }
 }
