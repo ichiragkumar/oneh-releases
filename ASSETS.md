@@ -16,7 +16,7 @@ stat -f%z <file>                # macOS
 | `oneh-web-0.1.0-macos-arm64.json` | (metadata) | (metadata) | BUILT, optional upload |
 | `OneH-0.1.0-arm64.zip` | `40ddf547d293c2601f64e0f0e72c4bcff9b92231230a73f1636ea` | `11982522` | BUILT, ad-hoc signed, awaiting upload |
 | `OneH-0.1.0-arm64.zip.sha256` | (sidecar) | (sidecar) | BUILT, awaiting upload |
-| `OneH-0.1.0-arm64.dmg` | `4fbfa03ab0d7ceabe9ab5986b77671db273a871e399bfc82e122b2fa7da78a50` | `14766258` | BUILT, optional manual DMG |
+| `OneH-0.1.0-arm64.dmg` | `6611b3f17ae68f17a3fb88946a221a5afe4b724b7ab819794f13add05b64d8aa` | `13919337` | BUILT, optional manual DMG |
 | `install.sh` | `deb9df74fb3255e81ba4a76bf41a7b5cf7e75944f4b1eeed9561831f8bda9683` | `53122` | committed to repo + upload to Release |
 | `install.ps1` | `850b4a4616f9cae0a0e2c854cf551633fa318e0c7bcda805748a51ac9e77eb69` | `17146` | committed to repo + upload to Release |
 | `native-app.sh` | (see repo) | (see repo) | committed to repo + upload to Release |
